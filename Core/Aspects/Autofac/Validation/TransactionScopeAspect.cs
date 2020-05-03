@@ -16,7 +16,7 @@ namespace Core.Aspects.Autofac.Validation
                     invocation.Proceed();
                     transactionScope.Complete();
                 }
-                catch (Exception)
+                catch (System.Exception)
                 {
                     transactionScope.Dispose();
                     throw;

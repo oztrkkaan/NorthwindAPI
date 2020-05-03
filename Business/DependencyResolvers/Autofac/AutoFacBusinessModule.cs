@@ -10,7 +10,7 @@ using DataAccess.Concrete.EntityFramework;
 
 namespace Business.DependencyResolvers.AutoFac
 {
-   public class AutoFacBusinessModule:Module
+   public class AutofacBusinessModule:Module
     {
         protected override void Load(ContainerBuilder builder)
         {

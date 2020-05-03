@@ -5,15 +5,14 @@ using Core.Utilities.Interceptors;
 using Core.Utilities.Messages;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace Core.Aspects.Autofac.Logging
+namespace Core.Aspects.Autofac.Exception
 {
-    public class LogAspect : MethodInterception
+   public class ExceptionLogAspect:MethodInterception
     {
-        LoggerServiceBase _loggerServiceBase;
+        private LoggerServiceBase _loggerServiceBase;
 
-        public LogAspect(Type loggerService)
+        public ExceptionLogAspect(Type loggerService)
         {
             if (loggerService.BaseType != typeof(LoggerServiceBase))
             {
@@ -21,28 +20,31 @@ namespace Core.Aspects.Autofac.Logging
             }
             _loggerServiceBase = (LoggerServiceBase)Activator.CreateInstance(loggerService);
         }
-        protected override void OnBefore(IInvocation invocation)
+        protected override void OnException(IInvocation invocation, System.Exception e)
         {
-            _loggerServiceBase.Info(GetLogDetail(invocation));
+            LogDetailWithException logDetailWithException = GetLogDetail(invocation);
+            logDetailWithException.ExceptionMessage = e.Message ;
+            _loggerServiceBase.Error(logDetailWithException);
         }
-        private LogDetail GetLogDetail(IInvocation invocation)
+
+        private LogDetailWithException GetLogDetail(IInvocation invocation)
         {
             var logParameters = new List<LogParameter>();
             for (int i = 0; i < invocation.Arguments.Length; i++)
             {
-                logParameters.Add(new LogParameter
-                {
+                logParameters.Add(new LogParameter {
                     Name = invocation.GetConcreteMethod().GetParameters()[i].Name,
                     Value = invocation.Arguments[i],
-                    Type = invocation.Arguments[i].GetType().Name
+                    Type=invocation.Arguments[i].GetType().Name
                 });
             }
-            var logDetail = new LogDetail
+            var logDetailWithException = new LogDetailWithException
             {
                 MethodName = invocation.Method.Name,
                 LogParameters = logParameters
             };
-            return logDetail;
+
+            return logDetailWithException;
         }
     }
 }
